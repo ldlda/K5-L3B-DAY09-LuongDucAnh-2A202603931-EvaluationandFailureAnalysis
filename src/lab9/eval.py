@@ -13,6 +13,7 @@ written by this script only -- never edit reports/ by hand.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import platform
 import tempfile
@@ -87,7 +88,11 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
     cases = [Case(name=f"{it['item_id']}@{s}", inputs={"claim_id": it["claim_id"], "seed": s},
                   expected_output=labels[it["claim_id"]], metadata={"item_id": it["item_id"], "seed": s})
              for it in items for s in seeds]
-    dataset = Dataset(cases=cases, evaluators=[GRADERS[m]() for m in metric_ids])
+    dataset_kwargs = {"cases": cases, "evaluators": [GRADERS[m]() for m in metric_ids]}
+    # Dataset gained a required name argument in newer pydantic-evals releases.
+    if "name" in inspect.signature(Dataset).parameters:
+        dataset_kwargs["name"] = f"logix-{spec['eval_set_version']}"
+    dataset = Dataset(**dataset_kwargs)
     with tempfile.TemporaryDirectory(prefix="lab9-eval-") as tmp:
         # max_concurrency=1: shapes write traces/ and SQLite; keep runs deterministic.
         report = dataset.evaluate_sync(make_task(shape, world, claims, labels, Path(tmp)),
