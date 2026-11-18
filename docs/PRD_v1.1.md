@@ -2,6 +2,8 @@
 
 > v1.1 keeps the product behavior in v1.0 and makes release evidence, failure handling, and ownership measurable.
 
+**Student / eval owner:** Luong Duc Anh (2A202603931)
+
 ## 1. Change summary
 
 | Area | v1.0 | v1.1 |
@@ -73,4 +75,4 @@ The tone judge passes public calibration (κ=0.757, P=0.857, R=0.800), but is a 
 | Role | Name | Date |
 |---|---|---|
 | Product owner | | |
-| Eval owner / gate maintainer | | |
+| Eval owner / gate maintainer | Luong Duc Anh (2A202603931) | 2026-11-18 |

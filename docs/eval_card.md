@@ -1,5 +1,7 @@
 # Eval card — LogiX-VN refund agent
 
+- **Student / eval owner:** Luong Duc Anh (2A202603931)
+
 ## Core v1
 
 - **Baseline run:** `E-swarm-20261118-a16b`; eval set SHA `a16b7649a5f8`; 14 public claims × 5 seeds (70 trials), MockLLM.
@@ -11,7 +13,7 @@
 - **FM-08:** reply text is compared to the committed ledger when a reply event exists. The locked Day 8 reference emits no customer-facing reply event, so it is explicitly out of scope for this grader; Day 9 variants and future reply-producing variants are checked.
 - **Judge calibration:** tone κ=0.757, P=0.857, R=0.800; helpful κ=0.375, P=1.000, R=0.300 and excluded from gating. See [judge audit](judge_audit.md).
 - **Trace case:** [C-002@11](trace_case.md), FM-03; the first wrong event is `model_override` before quote.
-- **Release owner:** repository maintainer / eval owner. A blocked gate requires a code fix and fresh evaluation; any waiver must be documented in the PR.
+- **Release owner:** Luong Duc Anh (2A202603931), eval owner. A blocked gate requires a code fix and fresh evaluation; any waiver must be documented in the PR.
 - **Pilot scope:** offline regression evaluation of shipping-fee refunds, damaged-item compensation, order authorization, and approval handling on the public synthetic matrix.
 - **Limits:** only 14 public claims, 5 deterministic seeds, and MockLLM; judge replay uses public CSV labels. This does not establish production accuracy or real-user tone quality.
 - **Eval-set versioning:** add cases from reviewed traces or attacks under a new eval-set version, relabel separately, validate the set, and rerun the protected baseline before changing the release gate.
