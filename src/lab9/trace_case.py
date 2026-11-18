@@ -23,7 +23,7 @@ def investigate(shape: str, claim_id: str, seed: int) -> dict:
     variants.register()
     claims = load_jsonl(Path("data/public_claims.jsonl"))
     labels = {c["claim_id"]: c["expected"] for c in claims}
-    with tempfile.TemporaryDirectory(prefix="lab9-case-", ignore_cleanup_errors=True) as tmp:
+    with tempfile.TemporaryDirectory(prefix="lab9-case-") as tmp:
         trial = make_task(shape, load_json(WORLD), claims, labels, Path(tmp))({"claim_id": claim_id, "seed": seed})
     return {"trial": trial, "label": labels[claim_id]}
 

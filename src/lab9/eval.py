@@ -13,6 +13,7 @@ written by this script only -- never edit reports/ by hand.
 from __future__ import annotations
 
 import argparse
+import inspect
 import json
 import platform
 import tempfile
@@ -87,9 +88,12 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
     cases = [Case(name=f"{it['item_id']}@{s}", inputs={"claim_id": it["claim_id"], "seed": s},
                   expected_output=labels[it["claim_id"]], metadata={"item_id": it["item_id"], "seed": s})
              for it in items for s in seeds]
-    dataset = Dataset(name=f"logix-{spec['eval_set_version']}", cases=cases,
-                      evaluators=[GRADERS[m]() for m in metric_ids])
-    with tempfile.TemporaryDirectory(prefix="lab9-eval-", ignore_cleanup_errors=True) as tmp:
+    dataset_kwargs = {"cases": cases, "evaluators": [GRADERS[m]() for m in metric_ids]}
+    # Dataset gained a required name argument in newer pydantic-evals releases.
+    if "name" in inspect.signature(Dataset).parameters:
+        dataset_kwargs["name"] = f"logix-{spec['eval_set_version']}"
+    dataset = Dataset(**dataset_kwargs)
+    with tempfile.TemporaryDirectory(prefix="lab9-eval-") as tmp:
         # max_concurrency=1: shapes write traces/ and SQLite; keep runs deterministic.
         report = dataset.evaluate_sync(make_task(shape, world, claims, labels, Path(tmp)),
                                        max_concurrency=1, progress=False)
@@ -102,7 +106,8 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
         rows.append({"item_id": c.metadata["item_id"], "seed": c.metadata["seed"],
                      "slices": slices_of.get(c.metadata["item_id"], []), **scores,
                      "cost": float(c.output["result"].get("cost_estimate") or 0.0)})
-    failures = [f"{c.name}:{f.name}:{f.error_message[:80]}" for c in report.cases for f in c.evaluator_failures]
+    failures = [f"{c.name}:{f.name}:{f.error_message[:80]}" for c in report.cases
+                for f in getattr(c, "evaluator_failures", [])]
     eval_set_sha = evalset.sha12(Path(spec["eval_set"]))
     run_id = f"E-{shape}-{date.today():%Y%m%d}-{eval_set_sha[:4]}"
     return {"run_id": run_id, "shape": shape,
