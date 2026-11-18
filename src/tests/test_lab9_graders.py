@@ -46,5 +46,11 @@ def test_wrong_amount_in_ledger(graders):
     assert graders.RefundAmountCorrect().evaluate(ctx(trial(refund_vnd=60000))).value is False
 
 
+def test_proposal_amount_uses_labeled_entitlement(graders):
+    t = trial()
+    t["result"]["proposal_amount"] = 30000
+    assert graders.ProposalAmountCorrect().evaluate(ctx(t)).value is False
+
+
 def test_override_event_breaks_db_fact(graders):
     assert graders.DbFactKept().evaluate(ctx(trial(events=[{"kind": "model_override", "payload": {}}]))).value is False
